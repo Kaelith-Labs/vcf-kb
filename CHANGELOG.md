@@ -4,7 +4,7 @@ All notable changes to `@kaelith-labs/kb` are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This package ships markdown content (primers, best-practices, lenses, review stages, reviewer configs, standards) consumed by `@kaelith-labs/cli`. KB updates can ship independently of server releases within a compatible peer-dep range.
 
-## [Unreleased]
+## [0.0.2-alpha.0] — 2026-04-19
 
 ### Added
 
