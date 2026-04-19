@@ -5,6 +5,14 @@
   "type": "module",
   "license": "Apache-2.0",
   "author": "Vibe Coding Framework contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaelith-Labs/vcf-kb.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Kaelith-Labs/vcf-kb/issues"
+  },
+  "homepage": "https://github.com/Kaelith-Labs/vcf-kb#readme",
   "engines": {
     "node": ">=20"
   },
