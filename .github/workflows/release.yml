@@ -31,7 +31,16 @@ jobs:
       - name: Publish to npm with provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --provenance --access public
+        run: |
+          # Prereleases (version contains a hyphen) go under `alpha` tag so
+          # `npm install <pkg>` without a tag doesn't silently pick up an
+          # unstable content revision once 1.0.0 ships.
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ "$VERSION" == *-* ]]; then
+            npm publish --provenance --access public --tag alpha
+          else
+            npm publish --provenance --access public
+          fi
 
   notes:
     runs-on: ubuntu-latest
