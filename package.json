@@ -15,8 +15,11 @@
     "NOTICE"
   ],
   "scripts": {
-    "validate": "vitest run",
-    "port": "node --import tsx scripts/port-kb.ts",
+    "validate": "vitest run && npm run validate:kb && npm run port:check",
+    "validate:kb": "tsx scripts/validate-kb.ts",
+    "port": "tsx scripts/port-kb.ts",
+    "port:check": "tsx scripts/port-kb.ts --check",
+    "typecheck": "tsc --noEmit",
     "lint": "prettier --check --no-error-on-unmatched-pattern \"kb/**/*.md\"",
     "lint:fix": "prettier --write --no-error-on-unmatched-pattern \"kb/**/*.md\""
   },
