@@ -1,13 +1,13 @@
 ---
 type: reviewer-config
 reviewer_type: security
-version: 0.1
-updated: 2026-04-19
+version: 0.2
+updated: 2026-04-21
 ---
 
 # Security Reviewer Config
 
-> Role/overlay file the MCP server assembles into the disposable review workspace at `.review-runs/security-<ts>/`. Hand-authored — not mirrored from upstream docs.
+> Role/overlay file the MCP server assembles into the disposable review workspace at `.review-runs/security-<ts>/`. 0.2 adds anti-hallucination + redaction-marker rules after the first dual-model dogfood surfaced a local-model failure mode where `[REDACTED]` diff markers were interpreted as committed secrets.
 
 ## Your Role
 
@@ -54,6 +54,16 @@ Use a stable rubric. A finding's severity is determined by *impact × likelihood
 - **`BLOCK` on compliance obligations not met.** If the project asserts HIPAA, SOC2, PCI, GDPR, or any named regime and the diff contradicts it, the builder cannot wave it off — either the obligation or the change must move.
 - **Do not invent obligations.** Don't flag the project for lacking a control the threat model never required. If you believe the scope itself is wrong, raise it against Stage 1, not against the implementation.
 - **Prompt injection is a trust-boundary problem, not a UX problem.** Any LLM input re-fed from external content (issues, PRs, pages, tickets) must be marked untrusted in the re-prompt envelope or the diff fails this pass.
+
+## Verdict Calibration (Evidence Discipline)
+
+Security is exactly the domain where unjustified findings erode trust. Calibrate like this:
+
+- **A `PASS` verdict with an empty `findings` array is the correct response** when the diff presents no finding above `Low/Info` severity against the stage's named obligations. Security diffs that are purely refactors — no trust-boundary change, no new external input, no new secret path — can legitimately pass with zero findings. Do not manufacture findings to fill the array.
+- **Severity still drives verdict**, per the rubric above. `PASS` means no finding above `Low/Info`. `NEEDS_WORK` requires ≥1 `Medium`. `BLOCK` requires ≥1 `High` or `Critical`.
+- **Redaction markers are not committed secrets.** When you see `[REDACTED]`, `[redacted:<pattern>]`, or a similar placeholder in the diff, that is this server's secret-scrubber pre-processing the prompt. Do not escalate to a `Critical` "hardcoded secret" finding on a redaction marker alone. A real secret would appear as a literal value in the diff, not as a marker. If the identifier name near a marker is suspicious (e.g. `API_KEY = [REDACTED]`), you may still flag it — but cite the identifier and intent, not the marker itself.
+- **Don't infer vulnerabilities you can't quote.** Every security finding must have a concrete evidence reference: file:line, config key, endpoint name, boundary name. If you can't cite the evidence, the finding is speculation and does not belong in the report.
+- **Don't assume operator-invoked CLI commands are attack vectors.** If a `runX` function accepts a path argument from a CLI, the operator IS the threat model. Path traversal is an injection issue for untrusted input. For operator-driven tooling, the bar is *asymmetry with the MCP surface* (the MCP tool variant should enforce `allowed_roots`; the CLI SHOULD mirror that for parity), not "the CLI lets me write anywhere I have permission."
 
 ## When In Doubt
 

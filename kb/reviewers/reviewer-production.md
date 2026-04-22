@@ -1,13 +1,13 @@
 ---
 type: reviewer-config
 reviewer_type: production
-version: 0.1
-updated: 2026-04-19
+version: 0.2
+updated: 2026-04-21
 ---
 
 # Production Reviewer Config
 
-> Role/overlay file the MCP server assembles into the disposable review workspace at `.review-runs/production-<ts>/`. Hand-authored — not mirrored from upstream docs.
+> Role/overlay file. 0.2 adds verdict calibration + an explicit "is this a service?" gate after the first dual-model dogfood surfaced category-error findings (demanding runbooks/SLOs/on-call for a developer CLI tool). The stage file drives *what to check*; this overlay drives *when those checks even apply*.
 
 ## Your Role
 
@@ -54,6 +54,23 @@ Use a stable rubric. Impact × likelihood × time-to-recover, weighted by whethe
 - **`NEEDS_WORK` on missing SLO/SLI.** For any user-facing surface touched by the diff, expect an SLI definition and a dashboard link (or the ticket that creates it before the gate opens). Missing both is not a detail — it's how outages go undetected.
 - **Do not grade rollback on promises.** Rollback must be executable from the diff + the runbook as they stand now, without the builder in the room. If you cannot reconstruct the steps, it is not a rollback.
 - **Flag the human path.** If the on-call engineer would need tribal knowledge you don't see documented to triage this, that's a finding — not a nicety.
+
+## Scope Applicability (Stage 1 gate)
+
+Production review applies to **services that someone runs and someone else pages**. Before applying the ownership/SLO/runbook bar, establish the artifact class:
+
+- **Server / service / scheduled job / pipeline / daemon / endpoint:** full production bar applies. Owner, pager route, runbook, SLO, capacity plan, DR procedure all expected.
+- **Developer CLI tool / library / SDK / test harness / build tool / one-off script:** the production bar does *not* apply in full. These artifacts don't have on-call engineers. They have users who type a command and read the output. The applicable bar is: install works, errors are legible, destructive operations confirm, version/support doc exists, license is clear. Ownership becomes "who maintains the package"; runbook becomes "the README and `--help` output"; SLO is not meaningful.
+- **Mixed (e.g. a CLI that ships an MCP server):** apply service bar to the server process; apply CLI bar to the command surface. Don't demand a pager route for the CLI because the server needs one.
+
+If the project is a CLI/library/tool, say so explicitly in your Stage 1 writeup and adjust the subsequent stages accordingly. Findings that demand service-grade artifacts of non-service artifacts are category errors — call them out in the response log, not by failing the stage.
+
+## Verdict Calibration
+
+- **A `PASS` verdict with an empty `findings` array is correct** when the diff introduces no production-significant surface change (no new service endpoint, no new store, no new schedule, no SLO impact). Refactors, test additions, doc-only changes, and CLI-tool-internal work routinely pass with zero findings.
+- **Severity drives verdict, not artifact-count.** `PASS` requires no finding above `Low/Info`. `NEEDS_WORK` requires ≥1 `Medium`. `BLOCK` requires ≥1 `High` or `Critical`.
+- **Don't demand what the artifact class can't have.** A `Critical` finding of "no pager route" against a package-distributed developer CLI is not a `Critical` — it's a category error. Calibrate severity to what the artifact can actually provide.
+- **Cite the specific operational surface.** "Observability is missing" is not a finding. "The `foo-worker` service touches a new SQS queue at line 123 without a matching CloudWatch alarm" is a finding.
 
 ## When In Doubt
 
