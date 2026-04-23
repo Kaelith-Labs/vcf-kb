@@ -48,6 +48,15 @@ An honest `PASS` is more useful than a padded `NEEDS_WORK`. Calibrate like this:
 - **Respect the builder's response log.** If a prior finding was responded to with a reasoned disagreement, don't re-flag unless new code invalidates the reasoning — and say so explicitly.
 - **PASS on a prior finding requires evidence, not assumption.** If a previous stage flagged a finding and the current diff claims to address it, your PASS must rest on *either* a file:line showing the fix *or* an explicit `accepted_risk` entry in the prior response log (with rationale you can verify). A PASS that silently drops an unaddressed prior finding is a regression in the review chain — escalate to NEEDS_WORK and call out the missing close-out.
 
+## Self-learning (followup #19)
+
+Review is the most knowledge-dense lifecycle step. When you spot a pattern worth remembering across projects — a class of bug that keeps showing up, a review heuristic that paid off, a diff pattern that correlates with regressions — log it via `lesson_log_add({ stage: "reviewing", scope: "universal", title, observation, actionable_takeaway, tags })` **in addition to** (not instead of) your normal findings. Guidelines:
+
+- **Threshold:** log a lesson only if the observation is likely useful on a *different* project, not just a one-off bug. If the observation is project-specific, a finding is the right channel; not a lesson.
+- **Carry-forward staleness is a lesson signal.** If a carry-forward entry has been dismissed (PASS-ed past) through multiple stages without resolution, that's a pattern worth remembering — log it with `tags: ["carry-forward-drift"]` and name the specific manifest field.
+- **Scope the lesson correctly:** `scope: "universal"` for cross-project guidance, `scope: "project"` for this-project-only. The default is `project`; override explicitly when the lesson is broader.
+- **Redaction still applies.** Lesson content goes through the same secret redactor as audit output; you don't have to scrub manually, but don't paste payloads you know contain secrets either.
+
 ## Tone
 
 Terse. Specific. File:line. Explain the *why*, especially when you disagree with a builder decision — the builder gets to respond and may teach you something the plan didn't capture.
