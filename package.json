@@ -1,6 +1,6 @@
 {
   "name": "@kaelith-labs/kb",
-  "version": "0.0.3-alpha.0",
+  "version": "0.7.0",
   "description": "Vibe Coding Framework knowledge base — primers, best-practices, lenses, review stages, reviewer configs. Content-only, no runtime code.",
   "type": "module",
   "license": "Apache-2.0",

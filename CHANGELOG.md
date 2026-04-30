@@ -4,7 +4,13 @@ All notable changes to `@kaelith-labs/kb` are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This package ships markdown content (primers, best-practices, lenses, review stages, reviewer configs, standards) consumed by `@kaelith-labs/cli`. KB updates can ship independently of server releases within a compatible peer-dep range.
 
-## [0.0.3-alpha.0] — 2026-04-30
+## [0.7.0] — 2026-04-30
+
+First non-alpha publish. Versioning now lockstep with `@kaelith-labs/cli`
+since the KB and CLI ship as one product (the CLI seeds the KB via
+`project_init`, and KB schema changes need a coordinated CLI bump).
+0.0.x-alpha.\* remained the npm prerelease prefix while the schema
+churned; 0.7.0 inherits that history under a stable version line.
 
 ### Added
 
